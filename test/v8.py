@@ -541,5 +541,24 @@ class TestNstepReplayBuffer(unittest.TestCase):
         self.assertEqual(rb.add(obs=(np.ones((16,16))),next_obs=(np.ones((16,16))),
                                 rew=1,done=0,priorities=1.0),0)
 
+    def test_unwritable(self):
+        rb = ReplayBuffer(32,{'obs': {}, 'rew': {}, 'done': {}},
+                          Nstep={"size": 4, "rew": "rew"})
+
+        obs = np.asarray(0)
+        obs.flags.writeable = False
+
+        rew = np.asarray(1)
+        rew.flags.writeable = False
+
+        done = np.asarray(1)
+        done.flags.writeable = False
+
+        self.assertIs(rb.add(obs=obs,rew=rew,done=done),None)
+        self.assertIs(rb.add(obs=obs,rew=rew,done=done),None)
+        self.assertIs(rb.add(obs=obs,rew=rew,done=done),None)
+        self.assertEqual(rb.add(obs=obs,rew=rew,done=done),0)
+
+
 if __name__ == '__main__':
     unittest.main()
